@@ -29,6 +29,10 @@ class TranslationService
         $sourceLanguage = $sourceLanguage ?: Language::recognize($input);
         $adapter = $this->getAdapter($sourceLanguage, $targetLanguage);
 
+        if (!$adapter->getSourceLanguage()->validate($input)) {
+            throw TranslationException::becauseInputStringIsNotValid($sourceLanguage, $input);
+        }
+
         return $adapter->translate($input);
     }
 
