@@ -6,7 +6,6 @@ namespace App\Exception;
 
 use App\Enum\Language;
 use Exception;
-use function sprintf;
 
 class TranslationException extends Exception
 {

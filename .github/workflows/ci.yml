@@ -1,0 +1,119 @@
+name: App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      NGINX_BASE_IMAGE: "ghcr.io/wesleyvestjens/php-devops-animal-training-test/nginx:base"
+      PHP_BASE_IMAGE: "ghcr.io/wesleyvestjens/php-devops-animal-training-test/php-fpm:base"
+      PHP_DEVELOPMENT_IMAGE: "ghcr.io/wesleyvestjens/php-devops-animal-training-test/php-fpm:development"
+      NGINX_PRODUCTION_IMAGE: "ghcr.io/wesleyvestjens/php-devops-animal-training-test/nginx:production"
+      PHP_PRODUCTION_IMAGE: "ghcr.io/wesleyvestjens/php-devops-animal-training-test/php-fpm:production"
+
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Nginx base image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker/nginx/base
+          tags: ${{ env.NGINX_BASE_IMAGE }}
+          cache-from: type=registry,ref=${{ env.NGINX_BASE_IMAGE }}
+          cache-to: type=inline
+          pull: true
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+
+      - name: Build PHP FPM base image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker/php-fpm/base
+          tags: ${{ env.PHP_BASE_IMAGE }}
+          cache-from: type=registry,ref=${{ env.PHP_BASE_IMAGE }}
+          cache-to: type=inline
+          pull: true
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+
+      - name: Build PHP FPM development image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker/php-fpm/development
+          tags: ${{ env.PHP_DEVELOPMENT_IMAGE }}
+          cache-from: type=registry,ref=${{ env.PHP_DEVELOPMENT_IMAGE }}
+          cache-to: type=inline
+          pull: true
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }} # Conditional push
+
+      - name: Pull latest development image
+        run: docker pull ${{ env.PHP_DEVELOPMENT_IMAGE }}
+
+      - name: Install Composer dependencies
+        run: |
+          docker run --rm \
+            -v "$(pwd):/app" \
+            -w /app/backend \
+            -u "$(id -u):$(id -g)" \
+            ${{ env.PHP_DEVELOPMENT_IMAGE }} \
+            composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Run PHP CS
+        run: |
+          docker run --rm \
+            -v "$(pwd):/app" \
+            -w /app/backend \
+            -u "$(id -u):$(id -g)" \
+            ${{ env.PHP_DEVELOPMENT_IMAGE }} \
+            php vendor/bin/phpcs
+
+      - name: Run PHP Unit
+        run: |
+          docker run --rm \
+            -v "$(pwd):/app" \
+            -w /app/backend \
+            -u "$(id -u):$(id -g)" \
+            ${{ env.PHP_DEVELOPMENT_IMAGE }} \
+            php -dxdebug.mode=coverage vendor/bin/phpunit --coverage-clover coverage.xml
+
+      - name: Upload PHP Unit Clover Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: backend/coverage.xml
+        if: success()
+
+      - name: Build Nginx for production
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/nginx/production/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+          tags: ${{ env.NGINX_PRODUCTION_IMAGE }}
+
+      - name: Build PHP FPM for production
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/php-fpm/production/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+          tags: ${{ env.PHP_PRODUCTION_IMAGE }}
