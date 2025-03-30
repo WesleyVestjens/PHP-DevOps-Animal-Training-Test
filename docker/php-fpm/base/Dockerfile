@@ -2,6 +2,10 @@ FROM php:8.4-fpm-alpine
 
 LABEL org.opencontainers.image.source=https://github.com/WesleyVestjens/PHP-DevOps-Animal-Training-Test
 
+# Install packages
+RUN apk add icu-dev
+RUN docker-php-ext-install intl && docker-php-ext-enable intl
+
 # Set default timezone
 RUN sed -ri -e 's!;date.timezone =!date.timezone = "Europe/Amsterdam"!g' /usr/local/etc/php/php.ini-production
 RUN sed -ri -e 's!;date.timezone =!date.timezone = "Europe/Amsterdam"!g' /usr/local/etc/php/php.ini-development

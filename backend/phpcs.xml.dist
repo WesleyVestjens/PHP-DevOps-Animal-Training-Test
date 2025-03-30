@@ -19,7 +19,20 @@
     <exclude-pattern>config/routes.php</exclude-pattern>
 
     <!-- Include all rules from the Laminas Coding Standard -->
-    <rule ref="LaminasCodingStandard"/>
+    <rule ref="LaminasCodingStandard">
+        <exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+        <exclude name="WebimpressCodingStandard.Arrays.DoubleArrow"/>
+        <exclude name="Generic.Formatting.SpaceAfterNot"/>
+        <exclude name="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly.ReferenceViaFullyQualifiedName"/>
+        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLinePropertyDocComment.MultiLinePropertyComment"/>
+        <exclude name="SlevomatCodingStandard.Commenting.DocCommentSpacing.IncorrectLinesCountBetweenDescriptionAndAnnotations"/>
+        <exclude name="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.UselessAnnotation"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.UselessAnnotation"/>
+        <exclude name="WebimpressCodingStandard.Strings.NoConcatenationAtTheEnd.ConcatenationAtTheEnd"/>
+        <exclude name="SlevomatCodingStandard.Commenting.ForbiddenAnnotations.AnnotationForbidden"/>
+        <exclude name="WebimpressCodingStandard.NamingConventions.Interface.Suffix"/>
+    </rule>
 
     <rule ref="Squiz.Classes.ClassFileName.NoMatch">
         <exclude-pattern>src/ConfigProvider.*.php</exclude-pattern>
@@ -28,5 +41,28 @@
     <rule ref="PSR12.Files.FileHeader.IncorrectOrder">
         <exclude-pattern>config/pipeline.php</exclude-pattern>
         <exclude-pattern>src/MezzioInstaller/Resources/config/routes-*.php</exclude-pattern>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly">
+        <properties>
+            <property name="allowFallbackGlobalFunctions" value="true"/>
+            <property name="allowFallbackGlobalConstants" value="true"/>
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
+        <properties>
+            <property name="spacesCountAroundEqualsSign" value="0"/>
+        </properties>
+    </rule>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="140"/>
+        </properties>
+
+        <exclude-pattern>/src/*/src/ConfigProvider.php</exclude-pattern>
+
+        <exclude-pattern>/test/**/*</exclude-pattern>
     </rule>
 </ruleset>
