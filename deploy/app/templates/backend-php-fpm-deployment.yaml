@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-fpm
+  labels:
+    app: php-fpm
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: php-fpm
+  template:
+    metadata:
+      labels:
+        app: php-fpm
+        iteration: {{ .Release.Revision | quote }}
+    spec:
+      imagePullSecrets:
+        - name: github-registry
+      containers:
+        - name: php-fpm
+          image: "ghcr.io/wesleyvestjens/php-devops-animal-training-test/php-fpm:production"
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 32m
+              memory: 128Mi
+            limits:
+              cpu: 256m
+              memory: 512Mi
+          ports:
+            - containerPort: 9000
+          readinessProbe:
+            initialDelaySeconds: 2
+            periodSeconds: 2
+            failureThreshold: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 9000
+          livenessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 2
+            periodSeconds: 2

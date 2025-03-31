@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+        iteration: {{ .Release.Revision | quote }}
+    spec:
+      imagePullSecrets:
+        - name: github-registry
+      containers:
+        - name: nginx
+          image: "ghcr.io/wesleyvestjens/php-devops-animal-training-test/nginx:production"
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi
+            limits:
+              cpu: 32m
+              memory: 128Mi
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            initialDelaySeconds: 2
+            periodSeconds: 2
+            failureThreshold: 5
+            successThreshold: 1
+            httpGet:
+              path: "/api/ping"
+              port: 8080

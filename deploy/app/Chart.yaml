@@ -1,0 +1,10 @@
+apiVersion: v2
+appVersion: "v1.0.0"
+description: This chart deploys the application from this repository.
+name: app
+version: 1.0.0
+home: https://www.wesleyvestjens.nl
+maintainers:
+  - name: Wesley
+    email: info@wesleyvestjens.nl
+    url: https://wesleyvestjens.nl
