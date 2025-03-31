@@ -112,3 +112,12 @@ The expected response body is as follows:
   "output": "Ik praat je na: Hello there!"
 }
 ```
+
+# Semi-production environment
+
+To run a semi-production environment (deploy to Minikube), run the following scripts:
+
+1. `/scripts/start-minikube.bash` > This will start a local Minikube cluster.
+2. `/scripts/deploy-to-production.bash` > This will perform a deployment to the local Minikube cluster.
+3. `/scripts/forward-for-production.bash` > This will output the correct URL for your local device/local Minikube
+   cluster, and show some developer information to help you perform requests against this environment.
