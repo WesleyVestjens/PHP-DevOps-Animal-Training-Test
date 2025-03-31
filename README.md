@@ -24,3 +24,91 @@ Each type of container (nginx, php-fpm) has a separate directory. Each directory
   for all environments.
 * `dev`: this is an image that extends `base` and contains additional instructions for development.
 * `production`: this is an image that extends `base` and contains additional instructions for production environments.
+
+# Setup / getting started
+
+Setup / getting started is easy.
+
+1. Checkout the repository on your device
+2. Run `docker compose up -d` to run the containers.
+3. Run `bin/composer install` to install Composer dependencies.
+4. Open [localhost/api/ping](http://localhost/api/ping)
+
+# Running linting and testing:
+
+Linting: `bin/phpcs`
+
+Testing: `bin/phpunit`
+
+# API documentation
+
+## Getting the translation matrix
+
+The translation matrix can be found on `/api/translation-matrix`. The expected response body is as follows:
+
+```json
+{
+  "matrix": [
+    {
+      "source": "human",
+      "targets": [
+        "labrador",
+        "poodle",
+        "parrot",
+        "parakeet"
+      ]
+    },
+    {
+      "source": "labrador",
+      "targets": [
+        "poodle",
+        "parrot"
+      ]
+    },
+    {
+      "source": "poodle",
+      "targets": [
+        "labrador",
+        "parrot"
+      ]
+    },
+    {
+      "source": "parrot",
+      "targets": []
+    },
+    {
+      "source": "parakeet",
+      "targets": [
+        "parrot"
+      ]
+    }
+  ]
+}
+```
+
+## Requesting translations for user input
+
+To request translations for user input, make a POST call to `/api/translate`.
+
+Required header: `content-type: application/json`
+
+Required body:
+
+```json
+{
+  "sourceLanguage": "auto",
+  "targetLanguage": "parrot",
+  "input": "Hello there!"
+}
+```
+
+The expected response body is as follows:
+
+```json
+{
+  "sourceLanguage": "auto",
+  "targetLanguage": "parrot",
+  "input": "Hello there!",
+  "output": "Ik praat je na: Hello there!"
+}
+```
